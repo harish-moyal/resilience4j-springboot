@@ -27,3 +27,5 @@ HELP.md
 mvnw
 mvnw.cmd
 target/
+.DS_Store
+spring-boot.iml

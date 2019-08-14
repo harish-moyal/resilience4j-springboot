@@ -10,6 +10,7 @@ resilience4j.circuitbreaker:
       eventConsumerBufferSize: 10
       ignoreExceptions:
        - com.resilience4j.exception.BusinessException
+       - feign.FeignException
       recordExceptions:
         - java.net.SocketTimeoutException
         - feign.RetryableException

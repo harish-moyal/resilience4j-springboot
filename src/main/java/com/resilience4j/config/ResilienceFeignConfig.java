@@ -5,7 +5,6 @@ import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.circuitbreaker.autoconfigure.CircuitBreakerProperties;
 import io.github.resilience4j.feign.FeignDecorators;
 import io.github.resilience4j.feign.Resilience4jFeign;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,6 @@ import org.springframework.context.annotation.Configuration;
 public class ResilienceFeignConfig {
 
     @Autowired
-    CircuitBreakerProperties circuitBreakerProperties;
-
-    @Autowired
     CircuitBreakerRegistry registry;
 
     @Bean
@@ -30,14 +26,14 @@ public class ResilienceFeignConfig {
 
         CircuitBreaker circuitBreaker = registry.circuitBreaker("myFeignClient");
 
-        MyFeignClient requestFailedFallback = () -> "fallback greeting";
+        MyFeignClient requestFailedFallback = () -> "Fallback on FeignException";
 
         MyFeignClient circuitBreakerFallback = () -> "CircuitBreaker is open!";
 
         FeignDecorators decorators = FeignDecorators.builder()
                 .withCircuitBreaker(circuitBreaker)
                 //.withFallbackFactory(MyFallback::new)
-                //.withFallback(requestFailedFallback, FeignException.class)
+                .withFallback(requestFailedFallback, FeignException.class)
                 .withFallback(circuitBreakerFallback, CallNotPermittedException.class) // These fallback only works when the fallbackMethod in io.github.resilience4j.feign.DefaultFallbackHandler is set to accessible true
                 .build();
 
