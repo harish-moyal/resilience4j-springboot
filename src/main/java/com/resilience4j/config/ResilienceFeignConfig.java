@@ -7,7 +7,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.feign.FeignDecorators;
 import io.github.resilience4j.feign.Resilience4jFeign;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,11 +18,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ResilienceFeignConfig {
 
-    @Autowired
-    CircuitBreakerRegistry registry;
-
     @Bean
-    public MyFeignClient myFeignClient() {
+    public MyFeignClient myFeignClient(CircuitBreakerRegistry registry) {
 
         CircuitBreaker circuitBreaker = registry.circuitBreaker("myFeignClient");
 
@@ -34,10 +31,12 @@ public class ResilienceFeignConfig {
                 .withCircuitBreaker(circuitBreaker)
                 //.withFallbackFactory(MyFallback::new)
                 .withFallback(requestFailedFallback, FeignException.class)
-                .withFallback(circuitBreakerFallback, CallNotPermittedException.class) // These fallback only works when the fallbackMethod in io.github.resilience4j.feign.DefaultFallbackHandler is set to accessible true
+                .withFallback(circuitBreakerFallback, CallNotPermittedException.class)
                 .build();
 
         return Resilience4jFeign.builder(decorators)
+                // This is needed to use Spring mvc annotations on feign client
+                .contract(new SpringMvcContract())
                 .target(MyFeignClient.class, "http://localhost:8090/");
     }
 

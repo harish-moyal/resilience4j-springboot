@@ -8,12 +8,6 @@ resilience4j.circuitbreaker:
       waitDurationInOpenState: 20s
       failureRateThreshold: 50
       eventConsumerBufferSize: 10
-      ignoreExceptions:
-       - com.resilience4j.exception.BusinessException
-       - feign.FeignException
-      recordExceptions:
-        - java.net.SocketTimeoutException
-        - feign.RetryableException
     shared:
       registerHealthIndicator: true
       ringBufferSizeInClosedState: 4
@@ -24,14 +18,47 @@ resilience4j.circuitbreaker:
       ignoreExceptions:
         - com.resilience4j.exception.BusinessException
   instances:
-    resilience4jService:
+    helloWorld:
       baseConfig: default
       ringBufferSizeInClosedState: 4
       registerHealthIndicator: true
+      recordExceptions:
+        - java.lang.RuntimeException
+    callOtherService:
+      baseConfig: default
+      ringBufferSizeInClosedState: 4
+      registerHealthIndicator: true
+      ignoreExceptions:
+        # We need to ignore 4xx errors returned by the server as they are valid business case.
+        - org.springframework.web.client.HttpClientErrorException
+      recordExceptions:
+        # We need to record all http errors
+        - org.springframework.web.client.RestClientException
     myFeignClient:
       baseConfig: default
       ringBufferSizeInClosedState: 4
       registerHealthIndicator: true
+      ignoreExceptions:
+        - feign.FeignException.BadRequest
+        - feign.FeignException.Unauthorized
+        - feign.FeignException.Forbidden
+        - feign.FeignException.NotFound
+        - feign.FeignException.MethodNotAllowed
+        - feign.FeignException.NotAcceptable
+        - feign.FeignException.Conflict
+        - feign.FeignException.Gone
+        - feign.FeignException.UnsupportedMediaType
+        - feign.FeignException.TooManyRequests
+        - feign.FeignException.UnprocessableEntity
+      recordExceptions:
+        - java.net.SocketTimeoutException
+        - java.net.ConnectException
+        - feign.FeignException.InternalServerError
+        - feign.FeignException.NotImplemented
+        - feign.FeignException.BadGateway
+        - feign.FeignException.GatewayTimeout
+        - feign.FeignException.ServiceUnavailable
+        - feign.RetryableException
 
 management:
   health:
