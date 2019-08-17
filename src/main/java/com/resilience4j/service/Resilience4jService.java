@@ -14,7 +14,7 @@ public class Resilience4jService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @CircuitBreaker(name = "helloWorld", fallbackMethod = "errorInternal")
+    @CircuitBreaker(name = "helloWorld"/*, fallbackMethod = "errorInternal"*/)
     public String helloWorld(String type) {
         if (type.equals("error")) {
             System.out.println("1. Call received means circuit is closed");
@@ -24,7 +24,7 @@ public class Resilience4jService {
         }
     }
 
-    @CircuitBreaker(name = "callOtherService", fallbackMethod = "errorExternal")
+    @CircuitBreaker(name = "callOtherService"/*, fallbackMethod = "errorExternal"*/)
     public String callOtherService(String success) {
         System.out.println("2. Call received means circuit is closed");
         if (Objects.nonNull(success)) {
@@ -37,10 +37,21 @@ public class Resilience4jService {
         throw new RuntimeException("I will always throw error");
     }
 
+    /**
+     * Fallback method for 'helloWorld' method
+     * @param methodParam
+     * @param throwable
+     * @return
+     */
     public String errorInternal(String methodParam, Throwable throwable) {
         return "This is error from fallback triggered by internal error";
     }
 
+    /**
+     * Fallback method for 'callOtherService' method
+     * @param throwable
+     * @return
+     */
     public String errorExternal(Throwable throwable) {
         return "This is error from fallback triggered by external error";
     }
